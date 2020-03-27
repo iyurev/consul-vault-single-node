@@ -1,0 +1,25 @@
+[Unit]
+Description="HashiCorp Consul"
+Documentation=https://www.consul.io/
+Requires=network-online.target
+After=network-online.target
+
+
+[Service]
+Environment=CONSUL_DATA="/opt/consul"
+Environment=NODE_NAME="consul-lab"
+Type=notify
+User=root
+Group=root
+ExecStartPre=/bin/bash -c 'if [[ ! -f /usr/local/bin/consul ]]; then curl -o /usr/local/bin/consul.zip https://releases.hashicorp.com/consul/1.6.2/consul_1.6.2_linux_amd64.zip && unzip -o /usr/local/bin/consul.zip  -d /usr/local/bin/; fi'
+ExecStartPre=/bin/mkdir -p ${CONSUL_DATA}
+ExecStart=/usr/local/bin/consul agent -client=127.0.0.1 -server -bind=127.0.0.1 -data-dir="${CONSUL_DATA}"  -node=${NODE_NAME} -ui  -join 127.0.0.1 -bootstrap-expect=1
+ExecReload=/usr/local/bin/consul reload
+KillMode=process
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+
+
