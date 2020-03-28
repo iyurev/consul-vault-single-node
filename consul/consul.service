@@ -1,0 +1,19 @@
+[Unit]
+Description="HashiCorp Consul"
+Documentation=https://www.consul.io/
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=on-failure
+Environment=CONSUL_DATA="/opt/consul"
+ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
+ExecStartPre=/bin/mkdir -p ${CONSUL_DATA}
+ExecStart=/usr/bin/podman run --conmon-pidfile /%t/%n-pid --cidfile /%t/%n-cid  -v ${CONSUL_DATA}:${CONSUL_DATA} -e "CONSUL_DATA=${CONSUL_DATA}"  -p 8500:8500 -p  8600:8600/udp  -d consul agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0 -ui  -join 127.0.0.1 -data-dir="${CONSUL_DATA}"
+ExecStop=/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
+KillMode=none
+Type=forking
+PIDFile=/%t/%n-pid
+
+[Install]
+WantedBy=multi-user.target
