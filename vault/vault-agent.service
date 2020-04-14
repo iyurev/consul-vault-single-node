@@ -1,0 +1,23 @@
+[Unit]
+Description="HashiCorp Vault Agent"
+Documentation=https://www.vault.io/
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Restart=on-failure
+Environment=CONSUL_DATA=/opt/consul
+Environment=IMAGE=docker.io/library/vault
+Environment=CONFIG_DIR=/etc/vault/
+Environment=HOST_INT=127.0.0.1
+Environment=TAG=1.4.0
+ExecStartPre=/bin/mkdir -p ${CONFIG_DIR}
+ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
+ExecStart=/usr/bin/podman run -d  --conmon-pidfile /%t/%n-pid --cidfile /%t/%n-cid  --name vault-agent  -e "CONFIG_DIR=${CONFIG_DIR}"  -v ${CONFIG_DIR}:${CONFIG_DIR}  -p ${HOST_INT}:8200:8200    --cap-add IPC_LOCK  ${IMAGE}:${TAG} agent -config=${CONFIG_DIR}/agent.hcl
+ExecStop=/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
+KillMode=none
+Type=forking
+PIDFile=/%t/%n-pid
+
+[Install]
+WantedBy=multi-user.target
