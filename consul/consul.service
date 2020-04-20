@@ -16,7 +16,7 @@ ExecStartPre=/bin/mkdir -p ${CONSUL_ETC}
 ExecStartPre=/bin/chown -R 100:1000 ${CONSUL_DATA}
 ExecStartPre=/bin/chown -R 100:1000 ${CONSUL_ETC}
 ExecStartPre=/usr/bin/rm -f /%t/%n-pid /%t/%n-cid
-ExecStart=/usr/bin/podman run --conmon-pidfile /%t/%n-pid --cidfile /%t/%n-cid --log-driver=journald -e "CONSUL_DATA=${CONSUL_DATA}, CONSUL_ETC=${CONSUL_ETC}" --name consul -v ${CONSUL_ETC}:${CONSUL_ETC} -v ${CONSUL_DATA}:${CONSUL_DATA}  -p ${HOST_INT}:8500:8500 -p  ${HOST_INT}:8600:8600/udp  -d  ${IMAGE}:${TAG} agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0 -ui  -join 127.0.0.1 -data-dir=${CONSUL_DATA} -config-dir=${CONSUL_ETC}
+ExecStart=/usr/bin/podman run --conmon-pidfile /%t/%n-pid --cidfile /%t/%n-cid --log-driver=journald -e "CONSUL_DATA=${CONSUL_DATA}, CONSUL_ETC=${CONSUL_ETC}"  -v ${CONSUL_ETC}:${CONSUL_ETC} -v ${CONSUL_DATA}:${CONSUL_DATA}  -p ${HOST_INT}:8500:8500 -p  ${HOST_INT}:8600:8600/udp  -d  ${IMAGE}:${TAG} agent -server -ui -node=server-1 -bootstrap-expect=1 -client=0.0.0.0 -ui  -join 127.0.0.1 -data-dir=${CONSUL_DATA} -config-dir=${CONSUL_ETC}
 ExecStop=/usr/bin/sh -c "/usr/bin/podman rm -f `cat /%t/%n-cid`"
 KillMode=none
 Type=forking
